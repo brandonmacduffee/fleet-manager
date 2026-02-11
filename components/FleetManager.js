@@ -271,12 +271,9 @@ function TeamSection({ team, allMembers, onUpdate, isEditing }) {
         }}>
           <div style={{ flex: 2, fontSize: 12 }}>
             {isEditing ? (
-              <select value={m.name} onChange={(e) => handleChange(idx, 'name', e.target.value)}
-                style={{ background: '#06060c', border: '1px solid #222', borderRadius: 6, padding: '5px 8px', color: C.text, fontSize: 11, fontFamily: font, width: '100%', maxWidth: 220 }}>
-                <option value="">-- Select PM --</option>
-                <option value="Vacant">Vacant</option>
-                {allMembers.map((n, i) => <option key={i} value={n}>{n}</option>)}
-              </select>
+              <input type="text" value={m.name} onChange={(e) => handleChange(idx, 'name', e.target.value)}
+                style={{ background: '#06060c', border: '1px solid #222', borderRadius: 6, padding: '5px 8px', color: C.text, fontSize: 11, fontFamily: font, width: '100%', maxWidth: 220 }}
+                placeholder="Enter PM name" list={`pm-list-${team.id}`} />
             ) : (
               <span style={{
                 color: m.isLead ? team.color : m.name === 'Vacant' ? C.red : '#c8c8d0',
@@ -309,11 +306,17 @@ function TeamSection({ team, allMembers, onUpdate, isEditing }) {
       ))}
 
       {isEditing && (
-        <button onClick={addMember} style={{
+        <>
+          <datalist id={`pm-list-${team.id}`}>
+            <option value="Vacant" />
+            {allMembers.map((n, i) => <option key={i} value={n} />)}
+          </datalist>
+          <button onClick={addMember} style={{
           display: 'block', width: '100%', background: 'transparent',
           border: 'none', borderTop: '1px dashed #1a1a2e', padding: 10,
           color: C.blue, fontSize: 10, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
         }}>+ ADD MEMBER</button>
+        </>
       )}
     </div>
   );
