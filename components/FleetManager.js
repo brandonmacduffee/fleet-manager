@@ -420,7 +420,6 @@ export default function FleetManager() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -462,17 +461,6 @@ export default function FleetManager() {
   };
 
   const handleLogout = () => { localStorage.removeItem('rpusa_auth'); setUser(null); setTeams([]); setIsEditing(false); };
-
-  const handleAddVacantTruck = async (teamId, truckNum) => {
-    try {
-      await supabase.from('members').insert({
-        team_id: teamId, name: 'Vacant', truck: truckNum, is_lead: false,
-        sort_order: 999,
-      });
-      await loadData();
-      notify(`✅ Truck #${truckNum} added as vacant`);
-    } catch { notify('❌ Failed to add truck.'); }
-  };
 
   if (loading) {
     return (
@@ -517,20 +505,12 @@ export default function FleetManager() {
           <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, letterSpacing: 0.5 }}>{dateStr}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <nav style={{ display: 'flex', gap: 2 }}>
-            {[
-              { id: 'dashboard', label: 'DASHBOARD', icon: '📊' },
-              { id: 'vacant', label: 'VACANT', icon: '🚛' },
-            ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                background: activeTab === tab.id ? 'rgba(30,144,255,0.1)' : 'transparent',
-                border: `1px solid ${activeTab === tab.id ? 'rgba(30,144,255,0.3)' : 'rgba(255,255,255,0.04)'}`,
-                borderRadius: 8, padding: '6px 14px',
-                color: activeTab === tab.id ? C.cyan : C.textDim,
-                fontSize: 9, letterSpacing: 2, cursor: 'pointer', fontFamily: font, fontWeight: 600,
-              }}>{tab.icon} {tab.label}</button>
-            ))}
-          </nav>
+          <div style={{
+            background: 'rgba(30,144,255,0.1)', border: '1px solid rgba(30,144,255,0.3)',
+            borderRadius: 8, padding: '6px 14px',
+          }}>
+            <span style={{ color: C.cyan, fontSize: 9, letterSpacing: 2, fontWeight: 600 }}>📊 DASHBOARD</span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.lime, boxShadow: `0 0 6px ${C.lime}` }} />
             <span style={{ fontSize: 8, color: C.lime, letterSpacing: 1.5, fontWeight: 600 }}>SYNCED</span>
@@ -565,39 +545,35 @@ export default function FleetManager() {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {activeTab === 'dashboard' && (
+          {isEditing ? (
             <>
-              {isEditing ? (
-                <>
-                  <button onClick={handleSave} disabled={saving} style={{
-                    background: saving ? '#111' : C.gradGreen,
-                    border: 'none', borderRadius: 10, padding: '8px 18px', color: saving ? '#555' : '#000',
-                    fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
-                    boxShadow: saving ? 'none' : '0 2px 14px rgba(0,255,136,0.2)',
-                  }}>{saving ? '⏳ SAVING...' : '💾 SAVE TO CLOUD'}</button>
-                  <button onClick={() => { setIsEditing(false); loadData(); }} style={{
-                    background: 'transparent', border: '1px solid #222', borderRadius: 10, padding: '8px 14px',
-                    color: C.textMuted, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: font,
-                  }}>✕ CANCEL</button>
-                </>
-              ) : (
-                <button onClick={() => setIsEditing(true)} style={{
-                  background: C.gradBlue, border: 'none', borderRadius: 10, padding: '8px 18px', color: '#fff',
-                  fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
-                  boxShadow: '0 2px 14px rgba(30,144,255,0.2)',
-                }}>✏️ EDIT MODE</button>
-              )}
-              <button onClick={handlePrint} style={{
-                background: C.gradOrange, border: 'none', borderRadius: 10, padding: '8px 18px', color: '#000',
+              <button onClick={handleSave} disabled={saving} style={{
+                background: saving ? '#111' : C.gradGreen,
+                border: 'none', borderRadius: 10, padding: '8px 18px', color: saving ? '#555' : '#000',
                 fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
-                boxShadow: '0 2px 14px rgba(255,140,0,0.2)',
-              }}>🖨️ PRINT REPORT</button>
-              <button onClick={loadData} style={{
-                background: 'transparent', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10,
-                padding: '8px 14px', color: C.textMuted, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: font,
-              }}>↻ REFRESH</button>
+                boxShadow: saving ? 'none' : '0 2px 14px rgba(0,255,136,0.2)',
+              }}>{saving ? '⏳ SAVING...' : '💾 SAVE TO CLOUD'}</button>
+              <button onClick={() => { setIsEditing(false); loadData(); }} style={{
+                background: 'transparent', border: '1px solid #222', borderRadius: 10, padding: '8px 14px',
+                color: C.textMuted, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: font,
+              }}>✕ CANCEL</button>
             </>
+          ) : (
+            <button onClick={() => setIsEditing(true)} style={{
+              background: C.gradBlue, border: 'none', borderRadius: 10, padding: '8px 18px', color: '#fff',
+              fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
+              boxShadow: '0 2px 14px rgba(30,144,255,0.2)',
+            }}>✏️ EDIT MODE</button>
           )}
+          <button onClick={handlePrint} style={{
+            background: C.gradOrange, border: 'none', borderRadius: 10, padding: '8px 18px', color: '#000',
+            fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer', fontFamily: font,
+            boxShadow: '0 2px 14px rgba(255,140,0,0.2)',
+          }}>🖨️ PRINT REPORT</button>
+          <button onClick={loadData} style={{
+            background: 'transparent', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10,
+            padding: '8px 14px', color: C.textMuted, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: font,
+          }}>↻ REFRESH</button>
         </div>
       </div>
 
@@ -609,16 +585,13 @@ export default function FleetManager() {
           </div>
         ) : (
           <>
-            {activeTab === 'dashboard' && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
-                {teams.map(t => (
-                  <TeamSection key={t.id} team={t} allMembers={allNames}
-                    onUpdate={(u) => setTeams(p => p.map(x => x.id === u.id ? u : x))}
-                    isEditing={isEditing} />
-                ))}
-              </div>
-            )}
-            {activeTab === 'vacant' && <VacantSection teams={teams} onAddTruck={handleAddVacantTruck} />}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
+              {teams.map(t => (
+                <TeamSection key={t.id} team={t} allMembers={allNames}
+                  onUpdate={(u) => setTeams(p => p.map(x => x.id === u.id ? u : x))}
+                  isEditing={isEditing} />
+              ))}
+            </div>
           </>
         )}
       </main>
@@ -627,7 +600,7 @@ export default function FleetManager() {
         textAlign: 'center', padding: 16, borderTop: `1px solid ${C.cardBorder}`,
         color: C.textDim, fontSize: 9, letterSpacing: 2.5,
       }}>
-        ROOFING PROS USA — Fleet Management System v3.0 — Cloud Synced
+        ROOFING PROS USA — Fleet Management System v5.0 — Cloud Synced
       </footer>
     </div>
   );
