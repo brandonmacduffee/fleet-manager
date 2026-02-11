@@ -1,0 +1,49 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Courier New', Courier, monospace;
+  background: #0a0a1a;
+  color: #e0e0e0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.012) 2px, rgba(0,255,136,0.012) 4px);
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a0a1a; }
+::-webkit-scrollbar-thumb { background: #1a2a3a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3a4a; }
+
+::selection { background: rgba(0,255,136,0.3); color: #fff; }
+
+input:focus, select:focus {
+  outline: none;
+  border-color: rgba(0,255,136,0.4) !important;
+  box-shadow: 0 0 8px rgba(0,255,136,0.1);
+}
+
+button { transition: all 0.2s ease; }
+button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+
+@keyframes slideIn {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.toast { animation: slideIn 0.3s ease; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.loading-pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+@media print { body::after { display: none; } }
