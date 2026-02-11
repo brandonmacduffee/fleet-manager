@@ -322,99 +322,6 @@ function TeamSection({ team, allMembers, onUpdate, isEditing }) {
   );
 }
 
-// ─── Vacant Section ───
-function VacantSection({ teams, onAddTruck }) {
-  const vacants = [];
-  const ntTrucks = [];
-  teams.forEach(t => t.members.forEach(m => {
-    if (m.name === 'Vacant') vacants.push({ team: t.name, teamId: t.id, truck: m.truck, color: t.color });
-    if (m.truck === 'NT' && m.name !== 'Vacant') ntTrucks.push({ team: t.name, name: m.name, color: t.color });
-  }));
-
-  const [showAdd, setShowAdd] = useState(false);
-  const [newTruck, setNewTruck] = useState('');
-  const [newTeam, setNewTeam] = useState(teams[0]?.id || '');
-
-  const handleAdd = () => {
-    if (newTruck.trim() && newTeam) {
-      onAddTruck(newTeam, newTruck.trim());
-      setNewTruck('');
-      setShowAdd(false);
-    }
-  };
-
-  const Card = ({ label, sub, accent }) => (
-    <div style={{
-      background: C.card, border: `1px solid ${C.cardBorder}`,
-      borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 4,
-      borderLeft: `3px solid ${accent}`,
-    }}>
-      <span style={{ fontSize: 16, fontWeight: 700, color: accent }}>{label}</span>
-      <span style={{ fontSize: 9, color: C.textMuted, letterSpacing: 1.5, fontWeight: 600 }}>{sub}</span>
-    </div>
-  );
-
-  return (
-    <div style={{
-      background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: 14, padding: 24,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 16, color: C.red, letterSpacing: 3 }}>🚛 VACANT TRUCKS</h2>
-        <button onClick={() => setShowAdd(!showAdd)} style={{
-          background: C.gradBlue, border: 'none', borderRadius: 8, padding: '8px 16px',
-          color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer',
-          fontFamily: font, boxShadow: '0 2px 12px rgba(30,144,255,0.2)',
-        }}>+ ADD TRUCK</button>
-      </div>
-
-      {showAdd && (
-        <div style={{
-          background: '#06060c', border: '1px solid rgba(30,144,255,0.15)', borderRadius: 10,
-          padding: 16, marginBottom: 16, display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap',
-        }}>
-          <div>
-            <label style={{ color: C.blue, fontSize: 8, letterSpacing: 2, display: 'block', marginBottom: 4, fontWeight: 600 }}>TRUCK #</label>
-            <input type="text" value={newTruck} onChange={(e) => setNewTruck(e.target.value)}
-              style={{ background: C.bg, border: '1px solid #222', borderRadius: 6, padding: '8px 10px', color: C.lime, fontSize: 13, fontFamily: font, width: 80, textAlign: 'center' }}
-              placeholder="###" />
-          </div>
-          <div>
-            <label style={{ color: C.blue, fontSize: 8, letterSpacing: 2, display: 'block', marginBottom: 4, fontWeight: 600 }}>ASSIGN TO TEAM</label>
-            <select value={newTeam} onChange={(e) => setNewTeam(e.target.value)}
-              style={{ background: C.bg, border: '1px solid #222', borderRadius: 6, padding: '8px 10px', color: C.text, fontSize: 11, fontFamily: font }}>
-              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-          <button onClick={handleAdd} style={{
-            background: C.gradGreen, border: 'none', borderRadius: 8, padding: '9px 18px',
-            color: '#000', fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: 'pointer', fontFamily: font,
-          }}>ADD</button>
-          <button onClick={() => setShowAdd(false)} style={{
-            background: 'transparent', border: '1px solid #333', borderRadius: 8, padding: '9px 14px',
-            color: C.textMuted, fontSize: 10, cursor: 'pointer', fontFamily: font,
-          }}>CANCEL</button>
-        </div>
-      )}
-
-      {vacants.length === 0 ? (
-        <p style={{ color: C.lime, fontSize: 13 }}>All trucks assigned!</p>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 10 }}>
-          {vacants.map((v, i) => <Card key={i} label={`#${v.truck}`} sub={v.team} accent={v.color} />)}
-        </div>
-      )}
-      {ntTrucks.length > 0 && (
-        <>
-          <h3 style={{ margin: '24px 0 14px', fontSize: 13, color: C.orange, letterSpacing: 2 }}>📋 NO TRUCK ASSIGNED (NT)</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 10 }}>
-            {ntTrucks.map((v, i) => <Card key={i} label={v.name} sub={v.team} accent={v.color} />)}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 // ─── Main App ───
 export default function FleetManager() {
   const [user, setUser] = useState(null);
@@ -505,12 +412,6 @@ export default function FleetManager() {
           <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, letterSpacing: 0.5 }}>{dateStr}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <div style={{
-            background: 'rgba(30,144,255,0.1)', border: '1px solid rgba(30,144,255,0.3)',
-            borderRadius: 8, padding: '6px 14px',
-          }}>
-            <span style={{ color: C.cyan, fontSize: 9, letterSpacing: 2, fontWeight: 600 }}>📊 DASHBOARD</span>
-          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.lime, boxShadow: `0 0 6px ${C.lime}` }} />
             <span style={{ fontSize: 8, color: C.lime, letterSpacing: 1.5, fontWeight: 600 }}>SYNCED</span>
@@ -600,7 +501,7 @@ export default function FleetManager() {
         textAlign: 'center', padding: 16, borderTop: `1px solid ${C.cardBorder}`,
         color: C.textDim, fontSize: 9, letterSpacing: 2.5,
       }}>
-        ROOFING PROS USA — Fleet Management System v5.0 — Cloud Synced
+        ROOFING PROS USA — Fleet Management System v6.0 — Cloud Synced
       </footer>
     </div>
   );
